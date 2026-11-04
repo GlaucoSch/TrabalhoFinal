@@ -1,0 +1,42 @@
+{
+  "info": {
+    "name": "Teste de upload de fotos de imóveis",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Enviar foto de imóvel",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "arquivo",
+              "type": "file",
+              "src": ""
+            },
+            {
+              "key": "imovelId",
+              "value": "1",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8080/fotos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "fotos"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

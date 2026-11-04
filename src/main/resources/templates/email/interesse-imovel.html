@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Interesse em imóvel</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #2c3e50; line-height: 1.5;">
+    <h2 th:text="'Nova solicitação de informações - ' + ${imovel.titulo}">Nova solicitação de informações</h2>
+
+    <p><strong>Mensagem da imobiliária</strong></p>
+    <p th:text="${mensagemImobiliaria}">Recebemos uma solicitação de informações sobre este imóvel.</p>
+
+    <h3>Dados do cliente</h3>
+    <p><strong>Nome:</strong> <span th:text="${nomeCliente}"></span></p>
+    <p><strong>Telefone:</strong> <span th:text="${telefoneCliente}"></span></p>
+    <p><strong>Email:</strong> <span th:text="${emailCliente}"></span></p>
+    <p><strong>Mensagem:</strong></p>
+    <p style="white-space: pre-line;" th:text="${mensagemCliente}"></p>
+
+    <h3>Dados do imóvel</h3>
+    <p><strong>Identificador:</strong> <span th:text="${imovel.id}"></span></p>
+    <p><strong>Título:</strong> <span th:text="${imovel.titulo}"></span></p>
+    <p><strong>Descrição:</strong> <span th:text="${imovel.descricao}"></span></p>
+    <p><strong>Tipo:</strong> <span th:text="${imovel.tipoImovel != null ? imovel.tipoImovel.nome : 'Não informado'}"></span></p>
+    <p><strong>Finalidade:</strong> <span th:text="${imovel.finalidade}"></span></p>
+    <p><strong>Status:</strong> <span th:text="${imovel.status}"></span></p>
+    <p><strong>Preço de venda:</strong> <span th:text="${imovel.precoVenda}"></span></p>
+    <p><strong>Preço de aluguel:</strong> <span th:text="${imovel.precoAluguel}"></span></p>
+    <p><strong>Endereço:</strong>
+        <span th:text="${imovel.endereco}"></span>
+        <span th:text="${imovel.numero}"></span>
+        <span th:text="${imovel.complemento}"></span>
+    </p>
+    <p><strong>Bairro:</strong> <span th:text="${imovel.bairro != null ? imovel.bairro.nome : 'Não informado'}"></span></p>
+    <p><strong>CEP:</strong> <span th:text="${imovel.cep}"></span></p>
+    <p><strong>Dormitórios:</strong> <span th:text="${imovel.dormitorios}"></span></p>
+    <p><strong>Banheiros:</strong> <span th:text="${imovel.banheiros}"></span></p>
+    <p><strong>Garagem:</strong> <span th:text="${imovel.garagem}"></span></p>
+    <p><strong>Área total:</strong> <span th:text="${imovel.areaTotal}"></span></p>
+    <p><strong>Área construída:</strong> <span th:text="${imovel.areaConstruida}"></span></p>
+    <p><strong>Características:</strong> <span th:text="${imovel.caracteristicas}"></span></p>
+</body>
+</html>

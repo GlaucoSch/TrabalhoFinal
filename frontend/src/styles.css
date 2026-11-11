@@ -237,6 +237,34 @@ td { padding: 14px 16px; border-top: 1px solid #f0f1ec; color: #5c675f; font-siz
 .favorite-card-wrap { position: relative; padding-bottom: 32px; }.favorite-remove { position: absolute; right: 2px; bottom: 1px; display: inline-flex; align-items: center; gap: 6px; border: 0; color: #a65c52; background: transparent; font-size: 10px; font-weight: 600; }
 .selected-property { display: flex; align-items: center; gap: 12px; margin: 0 0 18px; padding: 10px; border: 1px solid #e7e9e3; border-radius: 6px; background: #fafbf8; }.selected-property img { width: 57px; height: 48px; object-fit: cover; border-radius: 4px; }.selected-property > div { flex: 1; }.selected-property strong, .selected-property span { display: block; }.selected-property > div strong { font-size: 11px; }.selected-property span { margin-top: 4px; color: #879189; font-size: 9px; }.selected-property > strong { color: var(--green); font-size: 11px; }
 .form-page { max-width: 930px; }.form-card { padding: 24px; border: 1px solid #e5e8e1; border-radius: 9px; background: white; }.form-card > label { font-size: 11px; }.form-card textarea { min-height: 100px; }.form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.contract-modal-backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 24px; background: rgba(25, 34, 28, .62); }
+.contract-dialog { width: min(820px, 100%); max-height: calc(100dvh - 48px); overflow: auto; padding: 22px; border: 1px solid #e1e5dd; border-radius: 8px; background: #f6f7f3; box-shadow: 0 24px 70px rgba(0, 0, 0, .24); }
+.contract-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+.contract-dialog-header h2 { margin: 4px 0 0; color: #2e3932; font-size: 20px; }
+.contract-paper { max-width: 690px; margin: 0 auto 18px; padding: 42px 48px; border: 1px solid #e4e6df; background: white; color: #303832; box-shadow: 0 5px 18px rgba(37, 49, 40, .06); font-size: 12px; line-height: 1.75; }
+.contract-document-brand { color: #55725c; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; }
+.contract-document-label { margin: 24px 0 5px; color: #758078; font-size: 9px; font-weight: 700; }
+.contract-paper h3 { margin: 0; color: #28352f; font-size: 22px; }
+.contract-document-number { margin: 5px 0 24px; color: #7a847c; font-size: 10px; }
+.contract-paper section { margin-top: 20px; }
+.contract-paper h4 { margin: 0 0 7px; color: #3a5541; font-size: 12px; }
+.contract-paper section p { margin: 5px 0; }
+.contract-signature-lines { display: grid; grid-template-columns: 1.5fr 1fr; gap: 26px; margin-top: 44px; }
+.contract-signature-lines div { display: flex; flex-direction: column; gap: 5px; border-top: 1px solid #89928b; padding-top: 7px; }
+.contract-signature-lines span { font-weight: 600; }
+.contract-signature-lines small, .contract-draft-note { color: #7c857d; font-size: 9px; }
+.contract-draft-note { margin: 24px 0 0; text-align: center; }
+.contract-consent { display: flex; align-items: flex-start; gap: 9px; max-width: 690px; margin: 0 auto 16px; color: #4a574d; font-size: 11px; line-height: 1.5; }
+.contract-consent input { flex: 0 0 auto; margin: 1px 0 0; accent-color: var(--green); }
+.contract-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; max-width: 690px; margin: 0 auto; }
+@media print {
+  body * { visibility: hidden !important; }
+  .contract-modal-backdrop, .contract-modal-backdrop * { visibility: visible !important; }
+  .contract-modal-backdrop { position: static; display: block; padding: 0; background: white; }
+  .contract-dialog { width: 100%; max-height: none; overflow: visible; padding: 0; border: 0; background: white; box-shadow: none; }
+  .contract-dialog-header, .contract-consent, .contract-dialog-actions { display: none !important; }
+  .contract-paper { max-width: none; margin: 0; padding: 14mm; border: 0; box-shadow: none; }
+}
 .offer-type-fieldset { min-width: 0; padding: 0; margin: 3px 0 17px; border: 0; }
 .offer-type-fieldset legend { margin-bottom: 9px; color: #4b5850; font-size: 11px; font-weight: 600; }
 .offer-type-fieldset legend span { color: #ad6459; }
@@ -255,7 +283,7 @@ td { padding: 14px 16px; border-top: 1px solid #f0f1ec; color: #5c675f; font-siz
 @media (max-width: 900px) {
   .hero-content { gap: 25px; min-height: 500px; }.hero h1 { font-size: 49px; }.hero-photo { height: 345px; }
   .property-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.detail-layout { gap: 35px; grid-template-columns: minmax(0, 1fr) 320px; }
-  .filter-bar { grid-template-columns: minmax(180px, 1.3fr) repeat(3, minmax(110px, .8fr)) 45px; }.filter-select { padding: 0 7px; }.filter-select span { display: none; }
+  .filter-bar { grid-template-columns: minmax(180px, 1.3fr) repeat(3, minmax(110px, .8fr)) 45px; }.filter-select { min-height: 48px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 3px; padding: 2px 7px; }.filter-select span { display: block; }.filter-select select { width: 100%; min-width: 0; }.filter-select svg { position: absolute; right: 7px; bottom: 10px; }
   .admin-subnav { gap: 1px; }.admin-subnav-link { padding: 9px 10px; }
 }
 @media (max-width: 700px) {
@@ -263,7 +291,7 @@ td { padding: 14px 16px; border-top: 1px solid #f0f1ec; color: #5c675f; font-siz
   .mobile-menu-toggle { display: grid; place-items: center; }.main-nav { display: none; position: absolute; top: 64px; left: 0; right: 0; align-items: stretch; gap: 0; flex-direction: column; padding: 10px 18px 17px; border-bottom: 1px solid #e5e8e1; background: #fbfaf6; box-shadow: 0 14px 20px #12281b0e; }.main-nav-open { display: flex; }.nav-link { padding: 12px 6px; border-bottom: 1px solid #eeefe9; }.nav-actions { justify-content: space-between; margin: 13px 0 0; }.nav-user { max-width: 65%; }
   .hero-content { width: min(100% - 36px, 560px); min-height: unset; display: flex; flex-direction: column; align-items: stretch; gap: 34px; padding: 49px 0 47px; }.hero-copy { padding: 0; }.hero h1 { margin: 18px 0 13px; font-size: 43px; letter-spacing: -2px; }.hero-copy > p { font-size: 12px; }.hero-proof { margin-top: 21px; font-size: 9px; }.hero-visual { padding: 0 6px 17px 0; }.hero-photo { height: 290px; max-width: none; border-top-right-radius: 52px; }.hero-floating-card { right: 0; }.hero-photo-caption { left: 17px; bottom: 17px; }.hero-photo-caption strong { font-size: 16px; }
   .listing-section { padding-top: 50px; padding-bottom: 62px; }.section-intro { display: block; margin-bottom: 23px; }.section-intro h2 { font-size: 31px; }.section-intro > p { margin-top: 10px; font-size: 10px; }
-  .filter-bar { grid-template-columns: 1fr 42px; gap: 4px; padding: 8px; }.filter-search { grid-column: 1 / -1; border-bottom: 1px solid #edf0ea; }.filter-select { min-height: 42px; padding: 0 8px; border-left: 0; }.filter-select select { font-size: 10px; }.filter-submit { width: 36px; height: 36px; justify-self: end; }.listing-heading { align-items: center; }.sort-shortcut { display: none; }.property-grid { grid-template-columns: 1fr; gap: 15px; }.property-image-link { height: 215px; }.property-info { padding: 14px; }
+  .filter-bar { grid-template-columns: 1fr 42px; gap: 4px; padding: 8px; }.filter-search { grid-column: 1 / -1; border-bottom: 1px solid #edf0ea; }.filter-select { min-height: 48px; padding: 2px 8px; border-left: 0; }.filter-select select { font-size: 10px; }.filter-select svg { right: 8px; bottom: 11px; }.filter-submit { width: 36px; height: 36px; justify-self: end; }.listing-heading { align-items: center; }.sort-shortcut { display: none; }.property-grid { grid-template-columns: 1fr; gap: 15px; }.property-image-link { height: 215px; }.property-info { padding: 14px; }
   .values-section { padding: 50px 0; }.values-content { display: block; }.values-heading h2 { font-size: 30px; }.value-list { margin-top: 28px; }.value-list article { gap: 15px; }
   .footer-inner { flex-wrap: wrap; gap: 10px; }.footer-inner > span:nth-child(2) { display: none; }.footer-inner > span:last-child { font-size: 9px; }
   .auth-page { min-height: calc(100vh - 65px); grid-template-columns: 1fr; }.auth-photo { min-height: 220px; height: 220px; }.auth-photo::after { inset: 0; background: linear-gradient(90deg, rgba(25,46,34,.78), rgba(25,46,34,.15)); }.auth-photo-copy { left: 22px; bottom: 24px; }.auth-photo-copy h2 { margin: 8px 0 5px; font-size: 25px; }.auth-photo-copy p { font-size: 10px; }.auth-form-side { padding: 35px 20px 50px; align-items: flex-start; }.auth-form .text-link { margin-bottom: 25px; }.auth-form h1 { font-size: 28px; }

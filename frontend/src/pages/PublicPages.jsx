@@ -19,6 +19,14 @@ function availableProperties(properties) {
   return properties.filter(propertyAvailable);
 }
 
+function loginDestination(tipo, requestedPath) {
+  const home = tipo === 'ADMIN' ? '/admin' : '/cliente';
+  if (!requestedPath?.startsWith('/') || requestedPath.startsWith('//')) return home;
+  if (requestedPath.startsWith('/admin') && tipo !== 'ADMIN') return home;
+  if (requestedPath.startsWith('/cliente') && tipo !== 'USER') return home;
+  return requestedPath;
+}
+
 export function HomePage() {
   const { session } = useAuth();
   const [properties, setProperties] = useState([]);
@@ -60,9 +68,19 @@ export function HomePage() {
       result = result.filter((property) => `${property.titulo} ${property.descricao} ${property.bairro?.nome} ${property.bairro?.cidade}`.toLocaleLowerCase('pt-BR').includes(query));
     }
     if (filters.purpose) result = result.filter((property) => {
-      const purpose = String(property.finalidade || '').toLowerCase();
-      const both = purpose.includes('amb') || (purpose.includes('alug') && purpose.includes('vend'));
-      return both || propertyPurpose(property).toLowerCase() === filters.purpose;
+      const purpose = String(property.finalidade || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+        .toLowerCase();
+      const sells = purpose.includes('vend') || purpose.includes('compr');
+      const rents = purpose.includes('alug') || purpose.includes('loca');
+      const both = purpose.includes('amb') || (sells && rents);
+      if (both) return true;
+      if (sells || rents) return filters.purpose === 'venda' ? sells : rents;
+      return filters.purpose === 'venda'
+        ? property.precoVenda != null
+        : property.precoAluguel != null;
     });
     if (filters.neighborhood) result = result.filter((property) => property.bairro?.nome === filters.neighborhood);
     if (filters.minPrice !== '') result = result.filter((property) => Number(propertyPrice(property) || 0) >= Number(filters.minPrice));
@@ -288,8 +306,7 @@ export function LoginPage() {
   useEffect(() => {
     if (!session) return;
     const returnTo = new URLSearchParams(location.search).get('retorno');
-    const safeReturnTo = returnTo?.startsWith('/') && !returnTo.startsWith('//') ? returnTo : null;
-    navigate(location.state?.from?.pathname || safeReturnTo || (session.tipo === 'ADMIN' ? '/admin' : '/cliente'), { replace: true });
+    navigate(loginDestination(session.tipo, location.state?.from?.pathname || returnTo), { replace: true });
   }, [session, location, navigate]);
 
   async function submit(event) {
@@ -299,8 +316,7 @@ export function LoginPage() {
     try {
       const result = await login(form.email.trim(), form.senha);
       const returnTo = new URLSearchParams(location.search).get('retorno');
-      const safeReturnTo = returnTo?.startsWith('/') && !returnTo.startsWith('//') ? returnTo : null;
-      navigate(location.state?.from?.pathname || safeReturnTo || (result.tipo === 'ADMIN' ? '/admin' : '/cliente'), { replace: true });
+      navigate(loginDestination(result.tipo, location.state?.from?.pathname || returnTo), { replace: true });
     } catch (requestError) {
       setError(requestError.message || 'Não foi possível entrar. Confira seu e-mail e senha.');
     } finally {

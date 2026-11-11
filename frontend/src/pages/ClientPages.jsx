@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowRight, FileSignature, Heart, House, Plus, Send, Sparkles } from 'lucide-react';
+import { ArrowRight, FileSignature, Heart, House, Plus, Printer, Send, Sparkles, X } from 'lucide-react';
 import { api } from '../api';
 import {
   EmptyState, ErrorState, formatPrice, LoadingState, PageTitle, propertyAvailable,
@@ -211,6 +211,8 @@ export function ClientContractsPage() {
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
   const [signingId, setSigningId] = useState(null);
+  const [selectedContract, setSelectedContract] = useState(null);
+  const [acceptedDraft, setAcceptedDraft] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -223,16 +225,37 @@ export function ClientContractsPage() {
   }
   useEffect(() => { load(); }, []);
 
-  async function sign(contract) {
-    if (!window.confirm('Confirma que deseja assinar este contrato?')) return;
+  function closeDraft() {
+    setSelectedContract(null);
+    setAcceptedDraft(false);
+  }
+
+  async function signSelectedContract() {
+    const contract = selectedContract;
+    if (!contract || !acceptedDraft) return;
     setSigningId(contract.id);
     setActionError('');
     try {
       await api.post(`/contratos/${contract.id}/assinar`);
+      closeDraft();
       await load();
     } catch (requestError) { setActionError(message(requestError)); }
     finally { setSigningId(null); }
   }
+
+  const selectedOffer = selectedContract?.oferta || {};
+  const selectedProperty = selectedOffer.imovel || {};
+  const selectedClient = selectedOffer.usuario || {};
+  const propertyAddress = [
+    selectedProperty.endereco,
+    selectedProperty.numero,
+    selectedProperty.complemento,
+    selectedProperty.bairro?.nome,
+    selectedProperty.bairro?.cidade,
+    selectedProperty.bairro?.estado,
+    selectedProperty.cep,
+  ].filter(Boolean).join(', ');
+  const isRental = String(selectedOffer.tipo || '').toLowerCase().includes('alug');
 
   return (
     <div className="page-wrap dashboard-page">
@@ -240,8 +263,50 @@ export function ClientContractsPage() {
       {actionError && <div className="form-error-box" role="alert">{actionError}</div>}
       {loading || error || contracts.length === 0 ? <TableState loading={loading} error={error} retry={load} empty={{ title: 'Nenhum contrato por enquanto', description: 'Quando uma oferta for aceita, o contrato aparecerá aqui.' }} /> : (
         <div className="table-wrap"><table><thead><tr><th>Imóvel</th><th>Criado em</th><th>Assinatura</th><th>Situação</th><th>Ação</th></tr></thead><tbody>
-          {contracts.map((contract) => <tr key={contract.id}><td><span className="table-primary">{contract.oferta?.imovel?.titulo || `Contrato #${contract.id}`}</span><span className="table-secondary">Oferta #{contract.oferta?.id || contract.ofertaId || '—'}</span></td><td>{contract.dataAprovacao ? new Date(contract.dataAprovacao).toLocaleDateString('pt-BR') : '—'}</td><td>{contract.dataAssinatura ? new Date(contract.dataAssinatura).toLocaleDateString('pt-BR') : 'Pendente'}</td><td><StatusPill value={contract.status} /></td><td>{String(contract.status).toLowerCase().includes('aguardando') ? <button className="button button-dark button-small" disabled={signingId === contract.id} onClick={() => sign(contract)}>{signingId === contract.id ? 'Assinando...' : 'Assinar contrato'}</button> : <span className="table-secondary">—</span>}</td></tr>)}
+          {contracts.map((contract) => <tr key={contract.id}><td><span className="table-primary">{contract.oferta?.imovel?.titulo || `Contrato #${contract.id}`}</span><span className="table-secondary">Oferta #{contract.oferta?.id || contract.ofertaId || '—'}</span></td><td>{contract.dataAprovacao ? new Date(contract.dataAprovacao).toLocaleDateString('pt-BR') : '—'}</td><td>{contract.dataAssinatura ? new Date(contract.dataAssinatura).toLocaleDateString('pt-BR') : 'Pendente'}</td><td><StatusPill value={contract.status} /></td><td>{String(contract.status).toLowerCase().includes('aguardando') ? <button className="button button-dark button-small" disabled={signingId === contract.id} onClick={() => { setSelectedContract(contract); setAcceptedDraft(false); }}>Ler e assinar</button> : <span className="table-secondary">—</span>}</td></tr>)}
         </tbody></table></div>
+      )}
+      {selectedContract && (
+        <div className="contract-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) closeDraft(); }}>
+          <section className="contract-dialog" role="dialog" aria-modal="true" aria-labelledby="contract-draft-title">
+            <header className="contract-dialog-header">
+              <div><span className="eyebrow">DOCUMENTO PARA LEITURA</span><h2 id="contract-draft-title">Minuta do contrato</h2></div>
+              <button type="button" className="icon-button" onClick={closeDraft} aria-label="Fechar minuta"><X size={18} /></button>
+            </header>
+            <article className="contract-paper">
+              <div className="contract-document-brand">SCHNEIDER IMÓVEIS</div>
+              <p className="contract-document-label">MINUTA · CONTRATO DE {isRental ? 'LOCAÇÃO' : 'COMPRA E VENDA'}</p>
+              <h3>{selectedProperty.titulo || `Imóvel #${selectedProperty.id || '—'}`}</h3>
+              <p className="contract-document-number">Contrato #{selectedContract.id} · Oferta #{selectedOffer.id || '—'}</p>
+
+              <section><h4>1. Partes</h4>
+                <p><strong>Cliente/proponente:</strong> {selectedClient.nome || 'Nome não informado'} ({selectedClient.email || 'E-mail não informado'}).</p>
+                <p><strong>{isRental ? 'Locador(a)' : 'Vendedor(a)'}:</strong> dados de identificação a serem preenchidos pela imobiliária antes da formalização final.</p>
+              </section>
+              <section><h4>2. Imóvel</h4>
+                <p><strong>Identificação:</strong> {selectedProperty.titulo || `Imóvel #${selectedProperty.id || '—'}`}.</p>
+                <p><strong>Endereço:</strong> {propertyAddress || 'Endereço a confirmar'}.</p>
+              </section>
+              <section><h4>3. Proposta e condições</h4>
+                <p><strong>Modalidade:</strong> {isRental ? 'Locação' : 'Compra e venda'}.</p>
+                <p><strong>Valor proposto:</strong> {formatPrice(selectedOffer.valorProposto)}.</p>
+                <p><strong>Data da proposta:</strong> {selectedOffer.dataCriacao ? new Date(selectedOffer.dataCriacao).toLocaleDateString('pt-BR') : '—'}.</p>
+                <p><strong>Mensagem:</strong> {selectedOffer.mensagem || 'Sem mensagem adicional.'}</p>
+                {isRental && <p><strong>Prazo, vencimento, garantias e encargos:</strong> a definir no contrato final entre as partes.</p>}
+              </section>
+              <section><h4>4. Formalização</h4>
+                <p>Esta minuta resume a proposta aceita e os dados disponíveis no sistema. Prazos, responsabilidades, condições de pagamento e demais cláusulas devem ser revisados e preenchidos pelas partes antes da formalização do instrumento definitivo.</p>
+              </section>
+              <div className="contract-signature-lines"><div><span>{selectedClient.nome || 'Cliente/proponente'}</span><small>Assinatura eletrônica do cliente</small></div><div><span>{new Date().toLocaleDateString('pt-BR')}</span><small>Data da leitura</small></div></div>
+              <p className="contract-draft-note">Minuta demonstrativa; não substitui revisão jurídica nem o contrato definitivo completo.</p>
+            </article>
+            <label className="contract-consent"><input type="checkbox" checked={acceptedDraft} onChange={(event) => setAcceptedDraft(event.target.checked)} /><span>Li a minuta e confirmo a assinatura eletrônica da proposta exibida.</span></label>
+            <footer className="contract-dialog-actions">
+              <button type="button" className="button button-outline" onClick={() => window.print()}><Printer size={15} /> Imprimir / salvar PDF</button>
+              <button type="button" className="button button-dark" disabled={!acceptedDraft || signingId === selectedContract.id} onClick={signSelectedContract}>{signingId === selectedContract.id ? 'Assinando...' : 'Confirmar assinatura'} <ArrowRight size={15} /></button>
+            </footer>
+          </section>
+        </div>
       )}
     </div>
   );

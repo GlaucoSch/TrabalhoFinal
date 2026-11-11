@@ -2,6 +2,7 @@
 package com.example.demo.services;
 
 import java.util.Map;
+import java.io.File;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -43,6 +44,18 @@ public class EmailService {
         helper.setSubject(assunto);
         helper.setText(html, true);
 
+        mailSender.send(mime);
+    }
+
+    public void enviarEmailComAnexo(String para, String assunto, String texto, File anexo)
+            throws MessagingException {
+        MimeMessage mime = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
+        helper.setFrom(remetente);
+        helper.setTo(para);
+        helper.setSubject(assunto);
+        helper.setText(texto, false);
+        helper.addAttachment(anexo.getName(), anexo);
         mailSender.send(mime);
     }
 }

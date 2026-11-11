@@ -4,9 +4,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.util.List;
+import java.util.UUID;
 
+import com.example.demo.models.UserModel;
+import com.example.demo.repositories.UserRepository;
 import com.example.demo.services.JwtTokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(properties = "app.jwt.secret=bG9jYWwtZGV2LW9ubHktcmVwbGFjZS10aGlzLXNlY3JldC1rZXk=")
@@ -25,6 +30,43 @@ class SecurityAuthorizationTest {
 
     @Autowired
     private JwtTokenService jwtTokenService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Test
+    void shouldAuthenticateAgainstThePasswordHashStoredInDatabase() throws Exception {
+        String email = "auth-test-" + UUID.randomUUID() + "@example.com";
+        String password = "DatabaseTest#123";
+        UserModel user = new UserModel();
+        user.setNome("Auth test");
+        user.setEmail(email);
+        user.setTipo("USER");
+        user.setSenha(passwordEncoder.encode(password));
+        user = userRepository.save(user);
+
+        try {
+            mockMvc.perform(post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"email":"%s","senha":"%s"}
+                                    """.formatted(email, password)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.tipo").value("USER"));
+
+            mockMvc.perform(post("/auth/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                    {"email":"%s","senha":"wrong-password"}
+                                    """.formatted(email)))
+                    .andExpect(status().isUnauthorized());
+        } finally {
+            userRepository.delete(user);
+        }
+    }
 
     @Test
     void shouldRequireAuthenticationForPropertyManagement() throws Exception {

@@ -4,6 +4,36 @@
       "name": "app.upload-dir",
       "type": "java.lang.String",
       "description": "Diretório base para armazenar fotos enviadas."
+    },
+    {
+      "name": "app.imobiliaria.nome",
+      "type": "java.lang.String",
+      "description": "Nome da imobiliária usado nas mensagens e documentos."
+    },
+    {
+      "name": "app.email.destinatario",
+      "type": "java.lang.String",
+      "description": "Endereço que recebe as solicitações de informações dos imóveis."
+    },
+    {
+      "name": "app.jwt.secret",
+      "type": "java.lang.String",
+      "description": "Chave Base64 usada para assinar e validar tokens JWT."
+    },
+    {
+      "name": "app.jwt.expiration-ms",
+      "type": "java.lang.Long",
+      "description": "Tempo de validade dos tokens JWT, em milissegundos."
+    },
+    {
+      "name": "app.bootstrap-admin.email",
+      "type": "java.lang.String",
+      "description": "E-mail opcional do administrador inicial."
+    },
+    {
+      "name": "app.bootstrap-admin.password",
+      "type": "java.lang.String",
+      "description": "Senha opcional do administrador inicial."
     }
   ]
 }
